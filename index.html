@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0f" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="SMOS v7" />
+<meta name="description" content="Hood Boss Service Manager OS v7 — Truth Packet Kernel. NEXUS field intelligence by DoubleA @ AntManThePro." />
+<link rel="icon" href="favicon.ico?v=2" sizes="48x48 32x32 16x16" />
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png?v=2" />
+<link rel="icon" type="image/png" sizes="512x512" href="favicon-512.png?v=2" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2" />
+<link rel="manifest" href="manifest.json" />
+<title>HOOD BOSS // SMOS v7 — TRUTH PACKET</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --green:#00ff87; --cyan:#60efff; --pink:#ff0080; --yellow:#ffcc00;
+    --bg:#0a0a0f; --panel:#0d0d14; --border:#1a1a2e;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:var(--bg); color:#e8e8f0; font-family:Inter,system-ui,sans-serif; min-height:100%; }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 70% 40% at 15% -10%, rgba(0,255,135,.08), transparent 50%),
+      radial-gradient(ellipse 50% 35% at 95% 0%, rgba(96,239,255,.05), transparent 45%),
+      radial-gradient(ellipse 40% 30% at 50% 110%, rgba(255,0,128,.05), transparent 40%);
+  }
+  .shell { position:relative; z-index:1; max-width:1280px; margin:0 auto; padding:12px 12px 88px; }
+  .eyebrow { font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--green); font-weight:700; text-shadow:0 0 10px rgba(0,255,135,.45); }
+  .brand-row { display:flex; gap:10px; align-items:center; margin-bottom:6px; }
+  .sigil { width:36px; height:36px; flex:none; }
+  h1 { margin:2px 0; font-size:clamp(1.15rem,4vw,1.7rem); font-weight:800; letter-spacing:-.02em;
+    background:linear-gradient(90deg,#00ff87,#60efff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sub { color:#8a8aa0; font-size:.82rem; margin:0; }
+  .chip { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); border-radius:999px; padding:3px 8px; font-size:11px; color:var(--cyan); }
+  .topbar { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; padding-bottom:12px; border-bottom:1px solid var(--border); margin-bottom:14px; }
+  .badge { display:inline-flex; align-items:center; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:.06em; }
+  .badge.locked { background:rgba(255,0,128,.12); color:var(--pink); border:1px solid rgba(255,0,128,.35); }
+  .badge.unlocked { background:rgba(0,255,135,.12); color:var(--green); border:1px solid rgba(0,255,135,.35); }
+  .btn { appearance:none; border:1px solid transparent; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:650; cursor:pointer; font-family:inherit; color:inherit; }
+  .btn.primary { background:linear-gradient(135deg,#00ff87,#00cc6a); color:#04120a; box-shadow:0 0 14px rgba(0,255,135,.3); }
+  .btn.ghost { background:transparent; color:#b0b0c8; border-color:var(--border); }
+  .btn.danger { background:rgba(255,0,128,.14); color:var(--pink); border-color:rgba(255,0,128,.4); }
+  .btn:disabled { opacity:.45; cursor:not-allowed; }
+  .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:8px; margin-bottom:12px; }
+  .metric { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:10px 12px; position:relative; overflow:hidden; }
+  .metric::before { content:''; position:absolute; left:0; right:0; top:0; height:2px; background:linear-gradient(90deg,var(--green),var(--cyan)); }
+  .metric span { display:block; font-size:11px; color:#8a8aa0; letter-spacing:.05em; text-transform:uppercase; }
+  .metric strong { display:block; font-size:1.45rem; color:var(--green); text-shadow:0 0 12px rgba(0,255,135,.35); }
+  .metric small { color:#6a6a80; font-size:11px; }
+  .grid { display:grid; gap:12px; }
+  @media (min-width:980px) { .grid.main { grid-template-columns:1.35fr .9fr; } }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px; }
+  .section-head { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; margin-bottom:8px; }
+  .section-head h2 { margin:0; font-size:1rem; }
+  .muted { color:#7a7a90; font-size:12px; }
+  .day-strip { display:flex; gap:6px; overflow-x:auto; margin-bottom:8px; }
+  .day-chip { flex:none; border:1px solid var(--border); background:#111118; color:#9a9ab0; border-radius:8px; padding:6px 10px; font-weight:700; font-size:12px; cursor:pointer; }
+  .day-chip.active { background:rgba(0,255,135,.12); border-color:var(--green); color:var(--green); }
+  .day-chip.today { outline:1px solid rgba(96,239,255,.4); }
+  .alert { padding:8px 10px; border-radius:8px; font-size:13px; margin-bottom:8px; background:rgba(96,239,255,.08); border:1px solid rgba(96,239,255,.25); color:var(--cyan); }
+  .mission { background:#0f0f18; border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:8px; }
+  .mission .lbl { color:var(--yellow); font-size:11px; letter-spacing:.12em; font-weight:800; }
+  .mission h3 { margin:4px 0; font-size:1.02rem; }
+  .mission p { margin:0; color:#a0a0b8; font-size:13px; line-height:1.45; }
+  .task { display:flex; gap:8px; padding:8px; border-radius:8px; background:#111118; margin-bottom:6px; cursor:pointer; }
+  .task.done { opacity:.55; }
+  .task.done .tt { text-decoration:line-through; color:#6a6a80; }
+  .check { width:16px; height:16px; border:2px solid #3a3a50; border-radius:4px; flex:none; margin-top:2px; }
+  .task.done .check { background:var(--green); border-color:var(--green); box-shadow:0 0 8px rgba(0,255,135,.45); }
+  .tt { font-size:13.5px; font-weight:650; }
+  .tm { font-size:11px; color:#7a7a90; }
+  .lattice { position:relative; height:220px; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:#08080e; margin-top:8px; }
+  #lattice { width:100%; height:100%; display:block; touch-action:none; }
+  .lattice label { position:absolute; top:8px; left:10px; font-size:10px; letter-spacing:.12em; color:var(--cyan); pointer-events:none; }
+  .quick { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .q { text-align:left; background:#111118; border:1px solid var(--border); border-radius:10px; padding:10px; cursor:pointer; color:inherit; }
+  .q strong { display:block; font-size:13px; }
+  .q small { color:#7a7a90; font-size:11px; }
+  .scores { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:8px; }
+  .sb { text-align:center; background:#111118; border:1px solid var(--border); border-radius:8px; padding:8px 4px; }
+  .sb strong { display:block; color:var(--cyan); font-size:1.25rem; }
+  .sb span { font-size:10px; color:#8a8aa0; letter-spacing:.05em; text-transform:uppercase; }
+  .bar { height:6px; background:#1a1a28; border-radius:99px; overflow:hidden; }
+  .bar i { display:block; height:100%; width:0; background:linear-gradient(90deg,var(--green),var(--cyan)); box-shadow:0 0 8px rgba(0,255,135,.4); }
+  .focus { font-size:13.5px; line-height:1.45; color:#b8b8d0; margin:0; padding:8px; background:#0f0f18; border-left:3px solid var(--yellow); border-radius:8px; }
+  details summary { cursor:pointer; color:var(--yellow); font-size:12px; font-weight:700; }
+  textarea.kernel, textarea.out, .entry-form input, .entry-form select, .entry-form textarea {
+    width:100%; background:#15151f; border:1px solid #2a2a3a; border-radius:8px; color:#e8e8f0; padding:8px; font-size:13px; font-family:inherit;
+  }
+  textarea.kernel, textarea.out { font-family:ui-monospace,monospace; color:var(--green); min-height:88px; }
+  .tabs { display:flex; gap:4px; overflow-x:auto; border-bottom:1px solid var(--border); margin-bottom:10px; }
+  .tab { flex:none; background:transparent; border:none; color:#8a8aa0; font-weight:700; font-size:13px; padding:8px 10px; cursor:pointer; font-family:inherit; }
+  .tab.active { color:var(--green); box-shadow:inset 0 -2px 0 var(--green); }
+  .panel { display:none; }
+  .panel.active { display:block; }
+  .entry-form { background:#0f0f18; border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:10px; }
+  .fg { display:grid; gap:8px; margin-bottom:8px; }
+  @media (min-width:640px) { .fg.two { grid-template-columns:1fr 1fr; } .fg.three { grid-template-columns:1fr 1fr 1fr; } }
+  label.f { display:flex; flex-direction:column; gap:4px; font-size:12px; color:#9a9ab0; font-weight:650; }
+  .row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .entry { background:#111118; border:1px solid var(--border); border-radius:10px; padding:10px; display:flex; justify-content:space-between; gap:8px; margin-bottom:6px; }
+  .entry .title { font-weight:750; }
+  .entry .meta { font-size:11px; color:#7a7a90; margin-top:2px; }
+  .entry .notes { font-size:13px; color:#a0a0b8; margin-top:4px; }
+  .empty { text-align:center; padding:16px; color:#6a6a80; border:1px dashed #2a2a3a; border-radius:10px; font-size:13px; }
+  .prio-high { color:var(--pink); } .prio-medium { color:var(--yellow); } .prio-low { color:var(--cyan); }
+  .sev-critical { color:var(--pink); } .sev-major { color:var(--yellow); } .sev-minor { color:var(--cyan); }
+  dialog { border:1px solid var(--border); border-radius:14px; background:var(--panel); color:#e8e8f0; max-width:380px; width:calc(100% - 24px); }
+  dialog::backdrop { background:rgba(4,4,8,.78); }
+  .err { color:var(--pink); min-height:1.1em; font-size:13px; }
+  #hist { width:100%; height:160px; display:block; background:#08080e; border:1px solid var(--border); border-radius:10px; }
+  .statline { display:flex; gap:10px; flex-wrap:wrap; margin:8px 0; font-size:13px; }
+  .statline b { color:var(--green); }
+  footer { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; border-top:1px solid var(--border); margin-top:14px; padding-top:10px; color:#6a6a80; font-size:12px; }
+  footer span { color:var(--green); font-weight:700; }
+  .dock { position:fixed; left:0; right:0; bottom:0; z-index:5; display:flex; justify-content:space-around; gap:4px;
+    background:rgba(10,10,15,.92); border-top:1px solid var(--border); padding:8px 8px calc(8px + env(safe-area-inset-bottom)); backdrop-filter:blur(8px); }
+  .dock button { flex:1; background:transparent; border:none; color:#8a8aa0; font-size:11px; font-weight:700; font-family:inherit; padding:6px 2px; }
+  .dock button.on { color:var(--green); }
+  @media (min-width:980px) { .dock { display:none; } .shell { padding-bottom:24px; } }
+</style>
+</head>
+<body>
+<div class="shell" id="app">
+  <header class="topbar">
+    <div>
+      <div class="brand-row">
+        <svg class="sigil" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="14" fill="#0a0a0f" stroke="#00ff87" stroke-opacity=".5"/>
+          <path d="M14 50 V14 h10 l14 20 V14 h8 v36 h-10 L24 30 v20z" fill="none" stroke="#00ff87" stroke-width="3"/>
+          <circle cx="48" cy="16" r="4" fill="#ff0080"/>
+        </svg>
+        <div>
+          <p class="eyebrow">NEXUS · NExtended Xperimental USers</p>
+          <div class="chip">DoubleA · AntManThePro · Buda Ops</div>
+        </div>
+      </div>
+      <h1>HOOD BOSS // SERVICE MANAGER OS</h1>
+      <p class="sub">v7 Truth Packet Kernel · crew lattice · cycle-gate Monte Carlo · field payload compiler</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span id="lockState" class="badge locked">LOCKED</span>
+      <button id="unlockBtn" class="btn ghost">Unlock</button>
+      <button id="lockBtn" class="btn ghost" hidden>Lock</button>
+    </div>
+  </header>
+
+  <section class="metrics">
+    <article class="metric"><span>Day mission</span><strong id="weekPct">0%</strong><small>Selected day tasks</small></article>
+    <article class="metric"><span>Crew visits</span><strong id="visitsMetric">0</strong><small>Target 6</small></article>
+    <article class="metric"><span>Coaching</span><strong id="coachMetric">0</strong><small>Target 8</small></article>
+    <article class="metric"><span>Open risk</span><strong id="riskMetric">0</strong><small>Weighted deficiencies</small></article>
+  </section>
+
+  <div class="grid main">
+    <section class="card">
+      <div class="section-head">
+        <div><p class="eyebrow">WEEKLY OPERATING RHYTHM</p><h2>Mission Board</h2></div>
+        <span id="todayLabel" class="muted"></span>
+      </div>
+      <div id="dayStrip" class="day-strip"></div>
+      <div id="wedBanner" class="alert" hidden></div>
+      <article class="mission">
+        <div id="missionLabel" class="lbl"></div>
+        <h3 id="missionHeadline"></h3>
+        <p id="missionDetail"></p>
+      </article>
+      <div id="taskList"></div>
+      <div class="lattice">
+        <label>CREW LATTICE · RISK FLOWS TO HOT NODES</label>
+        <canvas id="lattice"></canvas>
+      </div>
+      <p class="muted" style="margin:6px 0 0">Tap a node to pin it. Particles carry deficiency weight toward the hottest crew.</p>
+    </section>
+
+    <aside class="grid">
+      <section class="card">
+        <div class="section-head"><h2>Quick Capture</h2><span class="muted">Unlock to write</span></div>
+        <div class="quick">
+          <button class="q" data-tab="coaching"><strong>Log Coaching</strong><small>People pressure</small></button>
+          <button class="q" data-tab="visits"><strong>Log Visit</strong><small>Field presence</small></button>
+          <button class="q" data-tab="defs"><strong>Deficiency</strong><small>NFPA attention</small></button>
+          <button class="q" data-tab="packet"><strong>Truth Packet</strong><small>Compile payload</small></button>
+        </div>
+      </section>
+      <section class="card">
+        <div class="section-head"><h2>Leadership Pulse</h2></div>
+        <div class="scores">
+          <div class="sb"><strong id="pulsePeople">0</strong><span>People</span></div>
+          <div class="sb"><strong id="pulseField">0</strong><span>Field</span></div>
+          <div class="sb"><strong id="pulseSystem">0</strong><span>Systems</span></div>
+        </div>
+        <div class="muted" style="display:flex;justify-content:space-between"><span>Visits</span><b id="visitKpi">0/6</b></div>
+        <div class="bar"><i id="visitBar"></i></div>
+        <div class="muted" style="display:flex;justify-content:space-between;margin-top:6px"><span>Coaching</span><b id="coachKpi">0/8</b></div>
+        <div class="bar"><i id="coachBar"></i></div>
+      </section>
+      <section class="card">
+        <h2 style="margin:0 0 8px">Next Focus</h2>
+        <p id="focusText" class="focus">Log field activity. The kernel will name the pressure.</p>
+        <details style="margin-top:8px">
+          <summary>LIVE FOCUS KERNEL</summary>
+          <textarea id="kernelCode" class="kernel" spellcheck="false">function customFocus(state, metrics) {
+  const gaps = [];
+  if (metrics.visits < 6) gaps.push("crew presence");
+  if (metrics.coaching < 8) gaps.push("coaching volume");
+  if (metrics.riskWeight > 12) gaps.push("open deficiency weight");
+  if (metrics.openActions > 3) gaps.push("action drag");
+  if (!gaps.length) return "Rhythm holds. Raise the photo and access standard.";
+  return "Primary pressure: " + gaps[0] + ". Secondary: " + (gaps[1] || "stability") + ".";
+}</textarea>
+          <div class="row">
+            <button id="hotReloadBtn" class="btn primary" type="button">Hot Reload</button>
+            <button id="resetKernelBtn" class="btn ghost" type="button">Reset</button>
+          </div>
+        </details>
+      </section>
+    </aside>
+  </div>
+
+  <section class="card" style="margin-top:12px" id="workspace">
+    <div class="tabs" id="tabBar">
+      <button class="tab active" data-tab="activity">Activity</button>
+      <button class="tab" data-tab="coaching">Coaching</button>
+      <button class="tab" data-tab="visits">Visits</button>
+      <button class="tab" data-tab="defs">Deficiencies</button>
+      <button class="tab" data-tab="actions">Actions</button>
+      <button class="tab" data-tab="interviews">Pipeline</button>
+      <button class="tab" data-tab="cycle">Cycle Gate</button>
+      <button class="tab" data-tab="packet">Truth Packet</button>
+      <button class="tab" data-tab="review">Review</button>
+    </div>
+
+    <div id="panel-activity" class="panel active"><div id="activityList"></div></div>
+
+    <div id="panel-coaching" class="panel">
+      <form id="coachingForm" class="entry-form">
+        <div class="fg two">
+          <label class="f">Employee<input id="coachName" required placeholder="Name" /></label>
+          <label class="f">Topic<select id="coachTopic"><option>Performance</option><option>Safety</option><option>Quality</option><option>Attendance</option><option>Leadership</option></select></label>
+        </div>
+        <label class="f">Notes<textarea id="coachNotes"></textarea></label>
+        <label class="f">Follow-up<input id="coachFollow" type="date" /></label>
+        <div class="row"><button class="btn primary" type="submit">Save coaching</button></div>
+      </form>
+      <div id="coachingList"></div>
+    </div>
+
+    <div id="panel-visits" class="panel">
+      <form id="visitForm" class="entry-form">
+        <div class="fg two">
+          <label class="f">Crew<input id="visitCrew" required placeholder="Crew ID" /></label>
+          <label class="f">Focus<select id="visitFocus"><option>QA</option><option>Safety</option><option>Efficiency</option><option>Training</option><option>Equipment</option></select></label>
+        </div>
+        <label class="f">Observations<textarea id="visitNotes"></textarea></label>
+        <div class="row"><button class="btn primary" type="submit">Save visit</button></div>
+      </form>
+      <div id="visitsList"></div>
+    </div>
+
+    <div id="panel-defs" class="panel">
+      <form id="defForm" class="entry-form">
+        <div class="fg three">
+          <label class="f">Crew<input id="defCrew" required placeholder="Crew or site" /></label>
+          <label class="f">Code<select id="defCode">
+            <option>GREASE</option><option>ACCESS</option><option>FAN</option><option>FILTER</option><option>ANSUL</option><option>PHOTO</option><option>MAKEUP</option>
+          </select></label>
+          <label class="f">Severity<select id="defSev"><option>Critical</option><option>Major</option><option>Minor</option></select></label>
+        </div>
+        <label class="f">Note<textarea id="defNotes" placeholder="What failed the standard"></textarea></label>
+        <div class="row"><button class="btn primary" type="submit">Log deficiency</button></div>
+      </form>
+      <div id="defList"></div>
+    </div>
+
+    <div id="panel-actions" class="panel">
+      <form id="actionForm" class="entry-form">
+        <div class="fg two">
+          <label class="f">Action<input id="actionTitle" required /></label>
+          <label class="f">Owner<input id="actionOwner" placeholder="Anthony / lead" /></label>
+          <label class="f">Due<input id="actionDue" type="date" /></label>
+          <label class="f">Priority<select id="actionPriority"><option>High</option><option>Medium</option><option>Low</option></select></label>
+        </div>
+        <div class="row"><button class="btn primary" type="submit">Save action</button></div>
+      </form>
+      <div id="actionList"></div>
+    </div>
+
+    <div id="panel-interviews" class="panel">
+      <form id="candidateForm" class="entry-form">
+        <div class="fg two">
+          <label class="f">Candidate<input id="candName" required /></label>
+          <label class="f">Status<select id="candStatus"><option>Scheduled</option><option>Interviewed</option><option>Offer</option><option>Hold</option><option>Declined</option></select></label>
+        </div>
+        <label class="f">Notes<textarea id="candNotes"></textarea></label>
+        <div class="row"><button class="btn primary" type="submit">Save candidate</button></div>
+      </form>
+      <div id="candidateList"></div>
+    </div>
+
+    <div id="panel-cycle" class="panel">
+      <form id="cycleForm" class="entry-form">
+        <p class="muted" style="margin-top:0">Binomial Monte Carlo. Each trial reviews N jobs at defect probability p. A trial passes if the observed defect rate is at or under the gate.</p>
+        <div class="fg three">
+          <label class="f">Jobs / trial <input id="cgN" type="number" min="5" max="80" value="20" /></label>
+          <label class="f">Defect p <input id="cgP" type="number" min="0" max="1" step="0.01" value="0.12" /></label>
+          <label class="f">Gate (max rate) <input id="cgGate" type="number" min="0" max="1" step="0.01" value="0.10" /></label>
+        </div>
+        <label class="f">Trials <input id="cgTrials" type="number" min="100" max="4000" value="800" /></label>
+        <div class="row"><button class="btn primary" type="submit">Run Cycle Gate</button></div>
+      </form>
+      <div class="statline">
+        <span>Pass probability <b id="cgPass">—</b></span>
+        <span>Mean defects <b id="cgMean">—</b></span>
+        <span>p95 rate <b id="cgP95">—</b></span>
+      </div>
+      <canvas id="hist"></canvas>
+      <p id="cgRead" class="focus" style="margin-top:8px">Run the gate. The histogram is the review distribution, not a decoration.</p>
+    </div>
+
+    <div id="panel-packet" class="panel">
+      <div class="row">
+        <button id="compilePacket" class="btn primary" type="button">Compile Truth Packet</button>
+        <button id="copyPacket" class="btn ghost" type="button">Copy</button>
+        <button id="exportJson" class="btn ghost" type="button">JSON State</button>
+        <button id="importV6" class="btn ghost" type="button">Import v6 local data</button>
+      </div>
+      <textarea id="packetOut" class="out" style="margin-top:8px;min-height:220px" readonly placeholder="Packet lands here."></textarea>
+    </div>
+
+    <div id="panel-review" class="panel">
+      <form id="reviewForm" class="entry-form">
+        <div class="fg two">
+          <label class="f">Revenue<input id="wrRevenue" placeholder="$118,000" /></label>
+          <label class="f">Labor %<input id="wrLabor" placeholder="28.7%" /></label>
+          <label class="f">QA audits<input id="wrQa" type="number" min="0" /></label>
+          <label class="f">Escalations closed<input id="wrEsc" type="number" min="0" /></label>
+        </div>
+        <label class="f">Notes<textarea id="wrNotes"></textarea></label>
+        <div class="row">
+          <button class="btn primary" type="submit">Save review</button>
+          <button id="clearWeekBtn" class="btn danger" type="button">Reset week data</button>
+        </div>
+      </form>
+      <div id="reviewList"></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>I = Nexus / AntManThePro</span>
+    <small>SMOS v7 · Truth Packet Kernel · client-side · protected by Netlify Team login</small>
+  </footer>
+</div>
+
+<nav class="dock" id="dock">
+  <button data-jump="mission" class="on">Board</button>
+  <button data-jump="coaching">Coach</button>
+  <button data-jump="defs">Risk</button>
+  <button data-jump="cycle">Gate</button>
+  <button data-jump="packet">Packet</button>
+</nav>
+
+<dialog id="authDialog">
+  <form id="authForm" class="card" style="border:none;margin:0">
+    <p class="eyebrow">EDIT CONTROL</p>
+    <h2 style="margin:4px 0">Unlock editing</h2>
+    <p class="muted">Editing is unlocked for the team — this site is protected by Netlify Team login, not a password in the page.</p>
+    <div class="row">
+      <button class="btn primary" type="submit">Unlock</button>
+      <button id="authCancel" class="btn ghost" type="button">Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'hb-smos-nexus-v7';
+  const V6_KEY = 'hb-smos-nexus-v1';
+  const AUTH_KEY = 'hb-smos-auth-v7';
+  const TARGETS = { visits: 6, coaching: 8 };
+  const SEV = { Critical: 5, Major: 3, Minor: 1 };
+  const MISSIONS = {
+    0: { label:'RECOVERY & PREP', headline:'System Reset + Week Preview', detail:'Clear bandwidth. Lock Monday’s top three.', tasks:[{id:'s1',title:'Scan open actions',meta:'15m'},{id:'s2',title:'Confirm Monday crews',meta:'10m'},{id:'s3',title:'Set leadership intention',meta:'5m'}]},
+    1: { label:'LAUNCH DAY', headline:'Plan · Align · Deploy', detail:'Set tempo. Publish visit and coaching targets.', tasks:[{id:'m1',title:'Leadership huddle',meta:'30m'},{id:'m2',title:'Publish targets',meta:'15m'},{id:'m3',title:'Clear weekend escalations',meta:'20m'},{id:'m4',title:'First coaching or visit',meta:'Field'}]},
+    2: { label:'FIELD PRESENCE', headline:'Crew Visits + Live Coaching', detail:'Be visible. Convert observations into coaching.', tasks:[{id:'t1',title:'At least 2 crew visits',meta:'Target'},{id:'t2',title:'Log a safety or QA note',meta:'Required'},{id:'t3',title:'One formal coaching',meta:'People'},{id:'t4',title:'Update open actions',meta:'Systems'}]},
+    3: { label:'SYSTEMS + PEOPLE', headline:'Pipeline and Hygiene', detail:'Alternate Wednesday: hiring pressure without abandoning the floor.', tasks:[{id:'w1',title:'Interview or pipeline review',meta:'Hiring'},{id:'w2',title:'Process friction check',meta:'Systems'},{id:'w3',title:'Targeted coaching block',meta:'People'},{id:'w4',title:'Short field touch',meta:'Field'}]},
+    4: { label:'EXECUTION PRESSURE', headline:'Close Gaps · Raise Standards', detail:'Kill high-priority drag. Spot-check documentation.', tasks:[{id:'th1',title:'Close or escalate high actions',meta:'Critical'},{id:'th2',title:'Catch-up visits if behind',meta:'Field'},{id:'th3',title:'QA photo spot-check',meta:'Quality'},{id:'th4',title:'Coach a recurring deficiency',meta:'People'}]},
+    5: { label:'FINISH STRONG', headline:'Hit Targets · Lock Coverage', detail:'Close the visit gap. Prep weekend notes.', tasks:[{id:'f1',title:'Close visit gap',meta:'Field'},{id:'f2',title:'Final coaching',meta:'People'},{id:'f3',title:'Weekend coverage confirmed',meta:'Ops'},{id:'f4',title:'Early revenue / labor signal',meta:'Metrics'}]},
+    6: { label:'WEEKLY REVIEW', headline:'Score the Week', detail:'Name the lever. Carry three actions forward.', tasks:[{id:'sa1',title:'Complete weekly review',meta:'Required'},{id:'sa2',title:'Score pulse',meta:'Leadership'},{id:'sa3',title:'Top 3 carry-forward',meta:'Systems'},{id:'sa4',title:'Recovery intention',meta:'Self'}]}
+  };
+
+  let state = { tasks:{}, coaching:[], visits:[], candidates:[], actions:[], reviews:[], defs:[], selectedDay:new Date().getDay(), pinned:null };
+  let focusKernel = null;
+  let lastCycle = null;
+
+  const $ = id => document.getElementById(id);
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c])); }
+  function weekStart() {
+    const start = new Date(); start.setHours(0,0,0,0);
+    const day = start.getDay();
+    start.setDate(start.getDate() - (day === 0 ? 6 : day - 1));
+    return start;
+  }
+  function thisWeek(arr) { const s = weekStart(); return arr.filter(e => new Date(e.ts) >= s); }
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) Object.assign(state, JSON.parse(raw));
+    } catch (e) {}
+    state.selectedDay = new Date().getDay();
+    state.unlocked = sessionStorage.getItem(AUTH_KEY) === '1';
+  }
+  function saveState() {
+    const copy = { ...state }; delete copy.unlocked;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(copy));
+  }
+  function setUnlocked(val) {
+    state.unlocked = val;
+    if (val) sessionStorage.setItem(AUTH_KEY, '1'); else sessionStorage.removeItem(AUTH_KEY);
+    $('lockState').textContent = val ? 'UNLOCKED' : 'LOCKED';
+    $('lockState').className = 'badge ' + (val ? 'unlocked' : 'locked');
+    $('unlockBtn').hidden = val;
+    $('lockBtn').hidden = !val;
+  }
+  function needUnlock() { if (!state.unlocked) { openAuth(); return true; } return false; }
+
+  function riskWeight() {
+    return state.defs.filter(d => !d.closed).reduce((s, d) => s + (SEV[d.severity] || 1), 0);
+  }
+  function computeMetrics() {
+    const visits = thisWeek(state.visits).length;
+    const coaching = thisWeek(state.coaching).length;
+    const interviews = thisWeek(state.candidates).length;
+    const openActions = state.actions.filter(a => !a.done).length;
+    const rw = riskWeight();
+    const dayTasks = MISSIONS[state.selectedDay].tasks;
+    const doneMap = state.tasks[String(state.selectedDay)] || {};
+    const doneCount = dayTasks.filter(t => doneMap[t.id]).length;
+    const weekPct = Math.round((doneCount / dayTasks.length) * 100);
+    return { visits, coaching, interviews, openActions, riskWeight: rw, weekPct };
+  }
+  function defaultFocus(m) {
+    if (m.riskWeight > 12) return `Risk weight ${m.riskWeight}. Close critical grease/access/fan items before adding volume.`;
+    if (m.visits < TARGETS.visits) return `Field pressure: ${m.visits}/${TARGETS.visits} visits. Get on a crew.`;
+    if (m.coaching < TARGETS.coaching) return `People gap: ${m.coaching}/${TARGETS.coaching} coaching logs.`;
+    if (m.openActions > 3) return `${m.openActions} open actions. Close or escalate the high ones.`;
+    return 'Rhythm holds. Raise the photo and access standard.';
+  }
+  function updateMetricsUI() {
+    const m = computeMetrics();
+    $('weekPct').textContent = m.weekPct + '%';
+    $('visitsMetric').textContent = m.visits;
+    $('coachMetric').textContent = m.coaching;
+    $('riskMetric').textContent = m.riskWeight;
+    const people = Math.min(100, Math.round((m.coaching / TARGETS.coaching) * 100));
+    const field = Math.min(100, Math.round((m.visits / TARGETS.visits) * 100));
+    const system = Math.max(0, Math.min(100, 100 - m.riskWeight * 6 - Math.max(0, m.openActions - 2) * 8));
+    $('pulsePeople').textContent = people;
+    $('pulseField').textContent = field;
+    $('pulseSystem').textContent = system;
+    $('visitKpi').textContent = `${m.visits}/${TARGETS.visits}`;
+    $('coachKpi').textContent = `${m.coaching}/${TARGETS.coaching}`;
+    $('visitBar').style.width = Math.min(100, (m.visits / TARGETS.visits) * 100) + '%';
+    $('coachBar').style.width = Math.min(100, (m.coaching / TARGETS.coaching) * 100) + '%';
+    try {
+      $('focusText').textContent = (typeof focusKernel === 'function' ? focusKernel(state, m) : defaultFocus(m)) || defaultFocus(m);
+    } catch (err) {
+      $('focusText').textContent = 'Kernel error: ' + err.message;
+    }
+    return m;
+  }
+
+  function renderDayStrip() {
+    const names = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const today = new Date().getDay();
+    $('dayStrip').innerHTML = names.map((n,i) => `<button class="day-chip${i===state.selectedDay?' active':''}${i===today?' today':''}" data-day="${i}">${n}</button>`).join('');
+    $('dayStrip').querySelectorAll('button').forEach(b => b.onclick = () => { state.selectedDay = +b.dataset.day; renderMission(); renderDayStrip(); updateMetricsUI(); });
+  }
+  function renderMission() {
+    const m = MISSIONS[state.selectedDay];
+    $('todayLabel').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' });
+    $('missionLabel').textContent = m.label;
+    $('missionHeadline').textContent = m.headline;
+    $('missionDetail').textContent = m.detail;
+    const banner = $('wedBanner');
+    if (state.selectedDay === 3) { banner.hidden = false; banner.textContent = 'ALTERNATE WEDNESDAY — hiring and systems, still touch the floor.'; }
+    else banner.hidden = true;
+    const key = String(state.selectedDay);
+    state.tasks[key] = state.tasks[key] || {};
+    $('taskList').innerHTML = m.tasks.map(t => `<div class="task${state.tasks[key][t.id]?' done':''}" data-task="${t.id}"><div class="check"></div><div><div class="tt">${t.title}</div><div class="tm">${t.meta}</div></div></div>`).join('');
+    $('taskList').querySelectorAll('.task').forEach(el => el.onclick = () => {
+      if (needUnlock()) return;
+      const id = el.dataset.task;
+      state.tasks[key][id] = !state.tasks[key][id];
+      saveState(); renderMission(); updateMetricsUI();
+    });
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+    document.querySelectorAll('.dock button').forEach(b => b.classList.toggle('on', b.dataset.jump === name || (name==='activity' && b.dataset.jump==='mission')));
+  }
+  $('tabBar').onclick = e => { const b = e.target.closest('.tab'); if (b) switchTab(b.dataset.tab); };
+  document.querySelectorAll('.q').forEach(b => b.onclick = () => { if (needUnlock()) return; switchTab(b.dataset.tab); });
+  $('dock').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.jump === 'mission') window.scrollTo({ top:0, behavior:'smooth' });
+    else { switchTab(b.dataset.jump); $('workspace').scrollIntoView({ behavior:'smooth' }); }
+  };
+
+  function renderList(el, arr, title, sub) {
+    const node = $(el);
+    if (!arr.length) { node.innerHTML = '<div class="empty">Nothing logged yet.</div>'; return; }
+    node.innerHTML = [...arr].reverse().map(e => `<div class="entry"><div><div class="title">${title(e)}</div><div class="meta">${sub(e)} · ${new Date(e.ts).toLocaleString()}</div>${e.notes?`<div class="notes">${esc(e.notes)}</div>`:''}</div><button class="btn danger del" data-id="${e.id}" data-bucket="${el}">Del</button></div>`).join('');
+  }
+  function renderAll() {
+    renderList('coachingList', state.coaching, e => esc(e.name), e => esc(e.topic));
+    renderList('visitsList', state.visits, e => esc(e.crew), e => esc(e.focus));
+    renderList('defList', state.defs, e => `<span class="sev-${(e.severity||'').toLowerCase()}">${esc(e.code)} · ${esc(e.severity)}</span>`, e => esc(e.crew));
+    renderList('actionList', state.actions, e => `<span class="prio-${(e.priority||'').toLowerCase()}">${esc(e.title)}</span>`, e => `${esc(e.owner||'—')} · due ${esc(e.due||'—')}`);
+    renderList('candidateList', state.candidates, e => esc(e.name), e => esc(e.status));
+    renderList('reviewList', state.reviews, e => esc(e.revenue || 'Review'), e => `Labor ${esc(e.labor||'—')} · QA ${e.qa||0}`);
+    const items = [];
+    state.coaching.forEach(e => items.push({ts:e.ts, type:'Coaching', text:`${e.name} · ${e.topic}`}));
+    state.visits.forEach(e => items.push({ts:e.ts, type:'Visit', text:`${e.crew} · ${e.focus}`}));
+    state.defs.forEach(e => items.push({ts:e.ts, type:'Deficiency', text:`${e.crew} · ${e.code}`}));
+    state.actions.forEach(e => items.push({ts:e.ts, type:'Action', text:e.title}));
+    state.candidates.forEach(e => items.push({ts:e.ts, type:'Pipeline', text:`${e.name} · ${e.status}`}));
+    items.sort((a,b) => b.ts - a.ts);
+    $('activityList').innerHTML = items.length ? items.slice(0,30).map(i => `<div class="entry"><div><div class="title">${i.type}</div><div class="meta">${esc(i.text)} · ${new Date(i.ts).toLocaleString()}</div></div></div>`).join('') : '<div class="empty">Activity appears as you log.</div>';
+  }
+  const buckets = { coachingList:'coaching', visitsList:'visits', defList:'defs', actionList:'actions', candidateList:'candidates', reviewList:'reviews' };
+  $('workspace').onclick = e => {
+    const del = e.target.closest('.del'); if (!del) return;
+    if (needUnlock()) return;
+    const key = buckets[del.dataset.bucket];
+    state[key] = state[key].filter(x => x.id !== del.dataset.id);
+    saveState(); renderAll(); updateMetricsUI();
+  };
+
+  function bindForm(formId, build) {
+    $(formId).onsubmit = e => {
+      e.preventDefault();
+      if (needUnlock()) return;
+      build();
+      e.target.reset();
+      saveState(); renderAll(); updateMetricsUI();
+    };
+  }
+  bindForm('coachingForm', () => state.coaching.push({ id:uid(), name:$('coachName').value.trim(), topic:$('coachTopic').value, notes:$('coachNotes').value.trim(), follow:$('coachFollow').value, ts:Date.now() }));
+  bindForm('visitForm', () => state.visits.push({ id:uid(), crew:$('visitCrew').value.trim(), focus:$('visitFocus').value, notes:$('visitNotes').value.trim(), ts:Date.now() }));
+  bindForm('defForm', () => state.defs.push({ id:uid(), crew:$('defCrew').value.trim(), code:$('defCode').value, severity:$('defSev').value, notes:$('defNotes').value.trim(), closed:false, ts:Date.now() }));
+  bindForm('actionForm', () => state.actions.push({ id:uid(), title:$('actionTitle').value.trim(), owner:$('actionOwner').value.trim(), due:$('actionDue').value, priority:$('actionPriority').value, done:false, ts:Date.now() }));
+  bindForm('candidateForm', () => state.candidates.push({ id:uid(), name:$('candName').value.trim(), status:$('candStatus').value, notes:$('candNotes').value.trim(), ts:Date.now() }));
+  bindForm('reviewForm', () => state.reviews.push({ id:uid(), revenue:$('wrRevenue').value.trim(), labor:$('wrLabor').value.trim(), qa:+$('wrQa').value||0, esc:+$('wrEsc').value||0, notes:$('wrNotes').value.trim(), ts:Date.now() }));
+
+  const dialog = $('authDialog');
+  function openAuth() { dialog.showModal(); }
+  $('unlockBtn').onclick = openAuth;
+  $('lockBtn').onclick = () => setUnlocked(false);
+  $('authCancel').onclick = () => dialog.close();
+  $('authForm').onsubmit = e => {
+    e.preventDefault();
+    setUnlocked(true); dialog.close();
+  };
+
+  const defaultKernel = $('kernelCode').value;
+  function compileKernel() {
+    try {
+      focusKernel = new Function('return (' + $('kernelCode').value.trim() + ')')();
+      if (typeof focusKernel !== 'function') throw new Error('Kernel must be a function');
+      updateMetricsUI();
+    } catch (err) { $('focusText').textContent = 'Kernel compile failed: ' + err.message; }
+  }
+  $('hotReloadBtn').onclick = compileKernel;
+  $('resetKernelBtn').onclick = () => { $('kernelCode').value = defaultKernel; compileKernel(); };
+
+  function runCycle(n, p, gate, trials) {
+    const hist = new Array(21).fill(0);
+    const rates = [];
+    let pass = 0, defSum = 0;
+    for (let t = 0; t < trials; t++) {
+      let d = 0;
+      for (let i = 0; i < n; i++) if (Math.random() < p) d++;
+      const rate = d / n;
+      rates.push(rate);
+      defSum += d;
+      hist[Math.min(20, Math.floor(rate * 20))]++;
+      if (rate <= gate + 1e-9) pass++;
+    }
+    rates.sort((a,b) => a-b);
+    return { passRate: pass / trials, meanDef: defSum / trials, p95: rates[Math.min(rates.length-1, Math.floor(rates.length * 0.95))], hist, trials, n, p, gate };
+  }
+  function drawHist(result) {
+    const c = $('hist'); const ctx = c.getContext('2d');
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const rect = c.getBoundingClientRect();
+    c.width = rect.width * dpr; c.height = 160 * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const w = rect.width, h = 160;
+    ctx.clearRect(0,0,w,h);
+    const max = Math.max(...result.hist, 1);
+    const bw = w / result.hist.length;
+    result.hist.forEach((v,i) => {
+      const bh = (v / max) * (h - 28);
+      const gateBin = Math.floor(result.gate * 20);
+      ctx.fillStyle = i <= gateBin ? '#00ff87' : '#ff0080';
+      ctx.globalAlpha = 0.85;
+      ctx.fillRect(i * bw + 2, h - 18 - bh, bw - 3, bh);
+    });
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = '#ffcc00';
+    ctx.beginPath();
+    const gx = Math.min(w - 1, result.gate * w);
+    ctx.moveTo(gx, 8); ctx.lineTo(gx, h - 18); ctx.stroke();
+    ctx.fillStyle = '#8a8aa0';
+    ctx.font = '11px ui-monospace,monospace';
+    ctx.fillText('0%', 4, h - 4);
+    ctx.fillText('gate', gx + 4, 16);
+    ctx.fillText('100%', w - 36, h - 4);
+  }
+  $('cycleForm').onsubmit = e => {
+    e.preventDefault();
+    const n = Math.max(5, +$('cgN').value || 20);
+    const p = Math.min(1, Math.max(0, +$('cgP').value || 0));
+    const gate = Math.min(1, Math.max(0, +$('cgGate').value || 0));
+    const trials = Math.min(4000, Math.max(100, +$('cgTrials').value || 800));
+    lastCycle = runCycle(n, p, gate, trials);
+    $('cgPass').textContent = (lastCycle.passRate * 100).toFixed(1) + '%';
+    $('cgMean').textContent = lastCycle.meanDef.toFixed(2);
+    $('cgP95').textContent = (lastCycle.p95 * 100).toFixed(1) + '%';
+    const verdict = lastCycle.passRate >= 0.8 ? 'Gate is stable at this prior.' : lastCycle.passRate >= 0.5 ? 'Gate is fragile. Tighten the prior or widen the gate.' : 'Gate fails under this prior. Do not ship the review standard as-is.';
+    $('cgRead').textContent = `${trials} trials · n=${n} · p=${p} · gate≤${gate}. ${verdict}`;
+    drawHist(lastCycle);
+  };
+
+  function compilePacket() {
+    const m = computeMetrics();
+    const openDefs = state.defs.filter(d => !d.closed);
+    const lines = [
+      'NEXUS TRUTH PACKET · HOOD BOSS SMOS v7',
+      'Operator: DoubleA @ AntManThePro · Buda Operations',
+      new Date().toISOString(),
+      '----------------------------------------',
+      `Mission day completion : ${m.weekPct}%`,
+      `Visits ${m.visits}/${TARGETS.visits} · Coaching ${m.coaching}/${TARGETS.coaching} · Open actions ${m.openActions}`,
+      `Deficiency weight : ${m.riskWeight}`,
+      `Focus : ${$('focusText').textContent}`,
+      '',
+      'OPEN DEFICIENCIES'
+    ];
+    if (!openDefs.length) lines.push('  none');
+    openDefs.forEach(d => lines.push(`  [${d.severity}] ${d.crew} · ${d.code} · ${d.notes || '—'}`));
+    lines.push('', 'VISITS THIS WEEK');
+    const wv = thisWeek(state.visits);
+    if (!wv.length) lines.push('  none');
+    wv.forEach(v => lines.push(`  ${v.crew} · ${v.focus} · ${v.notes || '—'}`));
+    lines.push('', 'COACHING THIS WEEK');
+    const wc = thisWeek(state.coaching);
+    if (!wc.length) lines.push('  none');
+    wc.forEach(c => lines.push(`  ${c.name} · ${c.topic} · ${c.notes || '—'}`));
+    if (lastCycle) lines.push('', `CYCLE GATE last run: pass ${(lastCycle.passRate*100).toFixed(1)}% · p=${lastCycle.p} · gate=${lastCycle.gate} · n=${lastCycle.n}`);
+    lines.push('', 'END PACKET · client-side · not a legal NFPA filing');
+    $('packetOut').value = lines.join('\n');
+  }
+  $('compilePacket').onclick = compilePacket;
+  $('copyPacket').onclick = async () => { if (!$('packetOut').value) compilePacket(); try { await navigator.clipboard.writeText($('packetOut').value); } catch (e) { $('packetOut').select(); } };
+  $('exportJson').onclick = () => {
+    $('packetOut').value = JSON.stringify({ meta:{ app:'SMOS v7', exported:new Date().toISOString() }, metrics:computeMetrics(), state }, null, 2);
+  };
+  $('importV6').onclick = () => {
+    if (needUnlock()) return;
+    try {
+      const raw = localStorage.getItem(V6_KEY);
+      if (!raw) { $('packetOut').value = 'No v6 key hb-smos-nexus-v1 in this browser.'; return; }
+      const old = JSON.parse(raw);
+      ['coaching','visits','candidates','actions','reviews'].forEach(k => {
+        if (Array.isArray(old[k])) state[k] = state[k].concat(old[k].filter(x => !state[k].some(y => y.id === x.id)));
+      });
+      saveState(); renderAll(); updateMetricsUI();
+      $('packetOut').value = 'Imported overlapping records from v6 local storage.';
+    } catch (err) { $('packetOut').value = 'Import failed: ' + err.message; }
+  };
+  $('clearWeekBtn').onclick = () => {
+    if (needUnlock()) return;
+    if (!confirm('Clear mission checks and logged records in this browser?')) return;
+    state.tasks = {}; state.coaching = []; state.visits = []; state.candidates = []; state.actions = []; state.reviews = []; state.defs = [];
+    saveState(); renderMission(); renderAll(); updateMetricsUI();
+  };
+
+  function initLattice() {
+    const canvas = $('lattice');
+    const ctx = canvas.getContext('2d');
+    let w = 0, h = 0, dpr = 1;
+    const particles = Array.from({ length: 42 }, (_, i) => ({ t: Math.random(), speed: 0.004 + Math.random()*0.008, edge: i % 5 }));
+    function resize() {
+      dpr = Math.min(devicePixelRatio || 1, 2);
+      const r = canvas.getBoundingClientRect();
+      w = r.width; h = r.height;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    resize();
+    addEventListener('resize', resize);
+    function crews() {
+      const names = new Set();
+      state.visits.forEach(v => names.add(v.crew));
+      state.defs.forEach(d => names.add(d.crew));
+      if (!names.size) ['CREW-A','CREW-B','CREW-C'].forEach(n => names.add(n));
+      return [...names].slice(0, 8);
+    }
+    function layout(list) {
+      return list.map((name, i) => {
+        const ang = -Math.PI / 2 + (i / list.length) * Math.PI * 2;
+        const open = state.defs.filter(d => d.crew === name && !d.closed);
+        const weight = open.reduce((s,d) => s + (SEV[d.severity] || 1), 0);
+        const visits = state.visits.filter(v => v.crew === name).length;
+        const risk = Math.max(8, Math.min(96, 28 + weight * 14 - visits * 6));
+        return { name, x: 0.5 + Math.cos(ang) * 0.34, y: 0.52 + Math.sin(ang) * 0.34, risk, weight };
+      });
+    }
+    canvas.onclick = ev => {
+      const r = canvas.getBoundingClientRect();
+      const x = (ev.clientX - r.left) / r.width, y = (ev.clientY - r.top) / r.height;
+      const nodes = layout(crews());
+      let best = null, bd = 0.08;
+      nodes.forEach(n => { const d = Math.hypot(n.x - x, n.y - y); if (d < bd) { bd = d; best = n.name; } });
+      state.pinned = best;
+    };
+    function frame() {
+      requestAnimationFrame(frame);
+      if (!w) return;
+      ctx.clearRect(0,0,w,h);
+      ctx.strokeStyle = 'rgba(96,239,255,0.05)';
+      for (let x = 0; x < w; x += 22) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+      const nodes = layout(crews());
+      const hot = nodes.reduce((a,b) => a.risk > b.risk ? a : b, nodes[0]);
+      nodes.forEach(n => {
+        ctx.beginPath();
+        ctx.moveTo(n.x*w, n.y*h); ctx.lineTo(hot.x*w, hot.y*h);
+        ctx.strokeStyle = 'rgba(0,255,135,0.14)';
+        ctx.stroke();
+      });
+      particles.forEach(p => {
+        p.t += p.speed * (1 + hot.risk / 80);
+        if (p.t > 1) p.t = 0;
+        const src = nodes[p.edge % nodes.length];
+        const x = (src.x + (hot.x - src.x) * p.t) * w;
+        const y = (src.y + (hot.y - src.y) * p.t) * h;
+        ctx.beginPath(); ctx.arc(x,y,1.6,0,Math.PI*2);
+        ctx.fillStyle = hot.risk > 60 ? '#ff0080' : '#00ff87';
+        ctx.shadowBlur = 8; ctx.shadowColor = ctx.fillStyle; ctx.fill(); ctx.shadowBlur = 0;
+      });
+      nodes.forEach(n => {
+        const col = n.risk > 60 ? '#ff0080' : n.risk > 35 ? '#ffcc00' : '#00ff87';
+        ctx.beginPath(); ctx.arc(n.x*w, n.y*h, 6 + n.risk/30, 0, Math.PI*2);
+        ctx.fillStyle = col; ctx.shadowBlur = 12; ctx.shadowColor = col; ctx.fill(); ctx.shadowBlur = 0;
+        if (state.pinned === n.name) { ctx.strokeStyle = '#60efff'; ctx.stroke(); }
+        ctx.fillStyle = col; ctx.font = '600 10px ui-monospace,monospace'; ctx.textAlign = 'center';
+        ctx.fillText(n.name.slice(0,12), n.x*w, n.y*h + 18);
+        ctx.fillText(String(n.risk), n.x*w, n.y*h - 12);
+      });
+    }
+    frame();
+  }
+
+  loadState();
+  setUnlocked(!!state.unlocked);
+  renderDayStrip();
+  renderMission();
+  renderAll();
+  compileKernel();
+  initLattice();
+})();
+</script>
+</body>
+</html>
